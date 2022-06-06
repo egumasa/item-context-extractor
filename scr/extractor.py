@@ -63,13 +63,13 @@ def extract_tree(md_token, sent, context):
 
 	conx = []
 	# embedded detection
-	for t in sent:
-		if t is md_token:
+	for t in context:
+		if t == md_token:
 			conx.append("<< {} >>".format(md_token.text))
 		else:
 			conx.append(t.text)
 
-		if t.tag_ in ['RB', 'RBR', 'RBS']: # extract adverbs regardless of the head LOL
+		if t.tag_ in ['RB', 'RBR', 'RBS'] and t.dep_ in ['advmod']: # extract adverbs regardless of the head LOL
 			loc = t.i - md_token.i
 			extra_adverbs.append( (t.text, loc) )
 	
