@@ -2,5 +2,5 @@ complete
 complete_data
 .vscode
 output*
-DS_Store
+.DS_Store
 data
