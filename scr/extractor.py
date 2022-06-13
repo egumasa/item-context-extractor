@@ -16,7 +16,7 @@ import csv
 
 nlp = spacy.load("en_core_web_trf")
 
-def extract_tree(md_token, sent, context):
+def extract_tree(md_token, sent, context: list):
 	modal = md_token
 	lex_verb = None
 	subject = None
@@ -29,7 +29,7 @@ def extract_tree(md_token, sent, context):
 	sv = None
 	falsestartflag = False
 
-	if md_token.head.pos_ in ["VERB", "AUX"]:
+	if md_token.head.pos_ in ["VERB", "AUX"] and  md_token.head != md_token:
 		lex_verb = md_token.head
 		morph = morph_to_dict(lex_verb)
 		#print(morph)
@@ -63,15 +63,18 @@ def extract_tree(md_token, sent, context):
 
 	conx = []
 	# embedded detection
-	for t in context:
-		if t == md_token:
-			conx.append("<< {} >>".format(md_token.text))
-		else:
-			conx.append(t.text)
+	for s in context:
+		conx.append("|")
+		for t in s:
+			if t == md_token:
+				conx.append("<< {} >>".format(md_token.text))
+			else:
+				conx.append(t.text)
 
-		if t.tag_ in ['RB', 'RBR', 'RBS'] and t.dep_ in ['advmod']: # extract adverbs regardless of the head LOL
-			loc = t.i - md_token.i
-			extra_adverbs.append( (t.text, loc) )
+			if t.tag_ in ['RB', 'RBR', 'RBS'] and t.dep_ in ['advmod']: # extract adverbs regardless of the head LOL
+				loc = t.i - md_token.i
+				extra_adverbs.append( (t.text, loc) )
+	conx.append("|")
 	
 
 	return ({"modal_v": modal,
@@ -120,19 +123,43 @@ def morph_dict2str(morph: dict):
 	
 	return res
 
+def context_extractor(sid, sents: list, length = 5):
+	window = int((length - 1) / 2)
 
-def test(text, stop_list = ['ta', 'wanna', 'got']):
+	if sid - window < 0:
+		start = 0
+	else:
+		start = sid - window
+
+	if sid + window > len(sents):
+		end = len(sents)
+	else:
+		end = sid + window + 1
+	
+	# print(len(sents[start:end]))
+	# print(sents[start:end])
+	return(sents[start:end])
+
+
+
+def test(text, stop_list = ['ta', 'wanna', 'got'], context_len = 5, print_conll = False):
 	sentids = {}
 	result = {}
 	embedding = {}
 
 	doc = nlp(text)
-	sent_holder = []
-	for sid, sent in enumerate(doc.sents, start = 1):
-		sent_holder.append(sent)
 
-		if len(sent_holder) >= 3:
-			sent_holder.pop(0)
+	if print_conll:
+		for s in doc.sents:
+			for t in s:
+				print(t, t.tag_, t.dep_, t.head.text)
+
+	sents = list(doc.sents)
+
+	# context_holder = []  # this is where we limit the context.
+
+	for sid, sent in enumerate(sents, start = 1):
+		context = context_extractor(sid, sents, length = 5) # this identifies surrounding context
 
 		for token in sent:
 			#m = morph_to_dict(token)
@@ -141,13 +168,48 @@ def test(text, stop_list = ['ta', 'wanna', 'got']):
 				if token.text.lower() in stop_list:
 					continue
 				sentids[token.i] = sid
-				result[token.i] = extract_tree(token, sent, doc)
+				result[token.i] = extract_tree(token, sent, context)
 				# tree search here.
 				embedding[token.i] = embedded_detection(token, sent)
 	return (sentids, result, embedding)
 
+#test("it might . ( xx )", print_conll=True)
 
-# doc = nlp("i wonder if you could explain")
+
+# doc = nlp("i wonder if you could explain. You wonder if you could explain. He wonders if you could explain. They wonders if you could explain. He wonders if you could explain. He wonders if you could explain. She wonders if you could explain. ")
+
+# doc = nlp('''According to the Anti-Defamation League, Patriot Front is a white supremacist group whose members maintain their ancestors conquered America and left it to them. The group split from another white supremacist group, Vanguard America, in late August 2017, per the ADL. White said the group was equipped with "shields, shin guards and other riot gear with them," along with papers he described as "similar to an operations plan that a police or military group would put together for an event." Enter your email to subscribe to the CNN Five Things Newsletter.close dialog CNN Five Things logo. You give us five minutes, we’ll give you five things you must know for the day. The 31 individuals were arrested for conspiracy to riot, which is a misdemeanor, White said, adding the suspects came from at least 11 states. Among those arrested was Patriot Front leader Thomas Ryan Rousseau, according to Sgt. Shane Kootenai County Sheriff's Office Rousseau has since bonded out of the Kootenai County Jail.''')
+
+# sents = list(doc.sents)
+# len(sents)
+
+# sents[6:7]
+
+
+# for i, sent in enumerate(sents, start = 0):
+# 	context_extractor(i, sents, length = 5)
+
+# 	if i - 2 < 0:
+# 		start = 0
+# 	else:
+# 		start = i - 2
+# 	if i + 2 > len(sents):
+# 		end = len(sents)
+# 	else:
+# 		end = i + 3
+	
+# 	print(len(sents[start:end]))
+# 	print(sents[start:end])
+
+# sent_h = []
+# for sent in doc.sents:
+# 	sent_h.append(sent)
+
+
+# for s in sent_h:
+# 	for t in s:
+# 		print(t.tag_)
+
 
 # doc[6].left_edge
 

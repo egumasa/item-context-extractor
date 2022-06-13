@@ -30,9 +30,9 @@ mv_dict = {"'ll": "will",
 			"woulda": "would"
 			}
 
-HEADER = "fileid\twordcount\trec_dur\tdate\tSPEECHEVENT\tACADDISC\tPARTLEVEL\tPRIMDISCMODE\tINTERACTIVITYRATING\tACADDIV\tParticipants\tSpeakers\tage\tid\tlang\trestrict\trole\tsex\tL1\tmodal_v\tmodal_lemma\tlex_verb\tTenseAspect\tsubject\tnegation\tdobj\tadverb\taux\tdep\tcontext"
+HEADER = "fileid\twordcount\trec_dur\tdate\tSPEECHEVENT\tACADDISC\tPARTLEVEL\tPRIMDISCMODE\tINTERACTIVITYRATING\tACADDIV\tParticipants\tSpeakers\tage\tid\tlang\trestrict\trole\tsex\tL1\tmodal_v\tmodal_lemma\tlex_verb\tTenseAspect\tsubject\tnegation\tdobj\tadverb\textra_adverbs\taux\tdep\tcontext"
 
-filenames = glob.glob('output_20220605/*.tsv')
+filenames = glob.glob('output_20220612/*.tsv')
 
 holder = []
 for file in filenames:
@@ -59,7 +59,7 @@ for file in filenames:
 
 len(holder)
 
-with open('complete_data/summarized_20220605.tsv', 'w') as f:
+with open('complete_data/summarized_20220612.tsv', 'w') as f:
 	f.write(HEADER)
 	f.write("\n")
 	for line in holder:

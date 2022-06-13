@@ -63,8 +63,8 @@ def extract_text(soup):
 				utter = u2.text.strip()
 				utter = re.sub(r"\n(\s)+", " ", utter)
 				holder.append((stwo, utter))
-			#and then delete them
-			u.u2.extract()
+				#and then delete them
+				u.u2.extract() #fixed the indent here.
 		
 		text = u.text.strip()
 		text = re.sub(r"\n(\s)+", " ", text)

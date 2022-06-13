@@ -55,16 +55,16 @@ def parse_save(meta, psn_dict, sent_list, save_filename, stop_psn = ['NRN', "NNS
 			psn, sent = sent_info
 			context.append(sent)
 
-			if len(context) >= 3:
+			if len(context) >= 5:
 				context.pop(0)
 
 			psn_info = psn_dict[psn]
 			
-			context = " ".join(context)
+			# context = " ".join(context)
 			# preprocessing happens here
 			if prep:
-				context = preprocess(context)
-				sent = preprocess(sent)
+				# context = preprocess(context)
+				sent = preprocess(sent) #this is turn
 
 			# Here we actually run processing over sentences.
 			modal_info = test(sent, stop_modal)
@@ -97,7 +97,7 @@ def parse_save(meta, psn_dict, sent_list, save_filename, stop_psn = ['NRN', "NNS
 
 def main():
 	filenames = glob.glob("data/MICASE/ver1_20220220/*.xml")
-	for idx, file in enumerate(filenames[:10]):	
+	for idx, file in enumerate(filenames):	
 		file_tail = os.path.split(file)[-1]
 		print("{} out of {} files: {}".format(idx, len(filenames), file_tail))
 
@@ -111,6 +111,6 @@ def main():
 		sent_list = extract_text(soup)
 		
 
-		parse_save(meta, psn_dict, sent_list, "output_20220605/{}".format(file_tail.replace(".xml", ".tsv")), stop_modal= PUNCT + stopmv)
+		parse_save(meta, psn_dict, sent_list, "output_20220612/{}".format(file_tail.replace(".xml", ".tsv")), stop_modal= PUNCT + stopmv)
 
 main()
